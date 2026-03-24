@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Code Login</title>
+  <link rel="stylesheet" href="/static/login.css">
+</head>
+<body>
+  <main class="login-shell">
+    <section class="login-card">
+      <h1>Claude Code</h1>
+      <p class="login-copy">输入访问密码后进入终端。</p>
+      <p id="loginError" class="login-error" hidden>密码错误，请重试。</p>
+      <form action="/login" method="post" class="login-form">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
+        <button type="submit">Enter</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error")) {
+      document.getElementById("loginError").hidden = false;
+    }
+  </script>
+</body>
+</html>
