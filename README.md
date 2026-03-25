@@ -14,6 +14,7 @@
 - 默认仅监听 `127.0.0.1:8081`
 - 默认纯黑终端界面，无侧边栏、无额外表单
 - 浏览器断开后保留 `claude` 进程，重连继续附加
+- 支持通过配置文件指定 `claude` 进程启动时的工作目录
 - 前端输入经 WebSocket 转发到 PTY，PTY 输出实时回传到浏览器
 - WebSocket 输入会过滤危险控制序列，限制异常 payload
 
@@ -28,6 +29,8 @@ go run .
 默认配置建议监听 `127.0.0.1:8081`，仅本机访问时打开 `http://127.0.0.1:8081`。
 
 服务启动前需要保证本机 `PATH` 中可以找到 `claude` 命令。
+
+如果你希望打开页面后直接在某个项目目录中运行 `claude`，可以在 `data/config.json` 中设置 `working_dir`，服务会按这个目录启动 `claude` 进程，而不是按当前启动命令所在目录启动。
 
 首次使用前先设置登录密码：
 
@@ -45,6 +48,7 @@ go run . -set-password
 - `listen_addr`: 可选，默认 `127.0.0.1:8081`
 - `password_hash`: 登录密码的 bcrypt 哈希
 - `restart_on_reconnect`: 默认 `false`。为 `true` 时，用户重连会重启终端进程而不是附加到旧会话
+- `working_dir`: 可选，`claude` 进程启动时使用的工作目录；未配置时默认使用服务启动目录
 - `session_secret`: 用于签名认证 cookie 的随机密钥
 - `created_at`: 配置文件首次写入时间，UTC 时间
 - `updated_at`: 配置最后一次更新的时间，UTC 时间
@@ -57,6 +61,7 @@ go run . -set-password
   "listen_addr": "0.0.0.0:8081",
   "password_hash": "$2a$10$exampleexampleexampleexampleexampleexampleexampleexample",
   "restart_on_reconnect": false,
+  "working_dir": ".",
   "session_secret": "replace-with-random-secret"
 }
 ```
@@ -118,6 +123,21 @@ go run . -set-password
   - 当值为 `false` 时，浏览器刷新后通常还能看到已有会话内容。
   - 当值为 `true` 时，重连后上下文会丢失，因为终端进程会重新创建。
 
+#### `working_dir`
+
+- 作用：指定后端启动 `claude` CLI 时使用的工作目录。
+- 默认行为：
+  - 未配置时，继续使用 `go run .` 或编译后二进制启动时所在的当前目录。
+  - 配置后，新的 `claude` 进程会在该目录下启动，而不是固定使用服务启动目录。
+- 支持格式：
+  - 绝对路径，例如 `/Users/name/workspace/my-project`
+  - 相对路径，例如 `.`、`..`、`../another-project`
+- 相对路径解析规则：
+  - 相对于服务启动目录解析，不是相对于 `data/config.json` 所在目录。
+- 注意：
+  - 路径必须真实存在，且必须是目录，否则服务会拒绝启动。
+  - 修改后需要重启服务才会生效。
+
 #### `session_secret`
 
 - 作用：用于签名登录 session cookie，防止客户端伪造认证状态。
@@ -163,6 +183,7 @@ go run . -set-password
   "listen_addr": "0.0.0.0:8081",
   "password_hash": "...",
   "restart_on_reconnect": false,
+  "working_dir": ".",
   "session_secret": "..."
 }
 ```

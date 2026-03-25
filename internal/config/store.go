@@ -3,9 +3,11 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -15,6 +17,7 @@ type File struct {
 	ListenAddr         string    `json:"listen_addr,omitempty"`
 	PasswordHash       string    `json:"password_hash,omitempty"`
 	RestartOnReconnect bool      `json:"restart_on_reconnect"`
+	WorkingDir         string    `json:"working_dir,omitempty"`
 	SessionSecret      string    `json:"session_secret,omitempty"`
 	CreatedAt          time.Time `json:"created_at"`
 	UpdatedAt          time.Time `json:"updated_at"`
@@ -63,6 +66,35 @@ func (s *Store) RestartOnReconnect() bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.cfg.RestartOnReconnect
+}
+
+func (s *Store) WorkingDir(baseDir string) (string, error) {
+	s.mu.RLock()
+	configuredDir := strings.TrimSpace(s.cfg.WorkingDir)
+	s.mu.RUnlock()
+
+	if configuredDir == "" {
+		return baseDir, nil
+	}
+
+	resolvedDir := configuredDir
+	if !filepath.IsAbs(resolvedDir) {
+		resolvedDir = filepath.Join(baseDir, resolvedDir)
+	}
+	resolvedDir = filepath.Clean(resolvedDir)
+
+	info, err := os.Stat(resolvedDir)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return "", fmt.Errorf("configured working_dir does not exist: %s", resolvedDir)
+		}
+		return "", fmt.Errorf("stat configured working_dir: %w", err)
+	}
+	if !info.IsDir() {
+		return "", fmt.Errorf("configured working_dir is not a directory: %s", resolvedDir)
+	}
+
+	return resolvedDir, nil
 }
 
 func (s *Store) PasswordHash() string {

@@ -23,7 +23,7 @@ type Attachment struct {
 }
 
 type Manager struct {
-	projectDir         string
+	workingDir         string
 	command            string
 	restartOnReconnect bool
 
@@ -32,7 +32,7 @@ type Manager struct {
 }
 
 type Session struct {
-	projectDir string
+	workingDir string
 	command    string
 
 	mu          sync.RWMutex
@@ -43,9 +43,9 @@ type Session struct {
 	subscribers map[chan []byte]struct{}
 }
 
-func NewManager(projectDir, command string, restartOnReconnect bool) *Manager {
+func NewManager(workingDir, command string, restartOnReconnect bool) *Manager {
 	return &Manager{
-		projectDir:         projectDir,
+		workingDir:         workingDir,
 		command:            command,
 		restartOnReconnect: restartOnReconnect,
 		sessions:           make(map[string]*Session),
@@ -81,7 +81,7 @@ func (m *Manager) get(id string) *Session {
 	session := m.sessions[id]
 	if session == nil {
 		session = &Session{
-			projectDir:  m.projectDir,
+			workingDir:  m.workingDir,
 			command:     m.command,
 			subscribers: make(map[chan []byte]struct{}),
 		}
@@ -105,7 +105,7 @@ func (s *Session) EnsureRunning(cols, rows int, restart bool) error {
 	}
 
 	cmd := exec.Command(s.command)
-	cmd.Dir = s.projectDir
+	cmd.Dir = s.workingDir
 	env := os.Environ()
 	filteredEnv := make([]string, 0, len(env))
 	hasUTF8Locale := false

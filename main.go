@@ -57,11 +57,11 @@ func main() {
 	setPassword := flag.Bool("set-password", false, "set or update the web login password")
 	flag.Parse()
 
-	projectDir, err := os.Getwd()
+	startupDir, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
-	cfg, err := config.Load(config.DefaultPath(projectDir))
+	cfg, err := config.Load(config.DefaultPath(startupDir))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func main() {
 		if err := configurePassword(cfg); err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("password updated in %s", config.DefaultPath(projectDir))
+		log.Printf("password updated in %s", config.DefaultPath(startupDir))
 		return
 	}
 	if !cfg.AuthConfigured() {
@@ -86,6 +86,10 @@ func main() {
 	if err := cfg.ValidateListenAddr(addr); err != nil {
 		log.Fatal(err)
 	}
+	workingDir, err := cfg.WorkingDir(startupDir)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	authSessions, err := auth.NewSessionManager(cfg.SessionSecret(), 7*24*time.Hour)
 	if err != nil {
@@ -95,7 +99,7 @@ func main() {
 	application := &app{
 		authSessions: authSessions,
 		passwordHash: cfg.PasswordHash(),
-		terminals:    terminal.NewManager(projectDir, commandName, cfg.RestartOnReconnect()),
+		terminals:    terminal.NewManager(workingDir, commandName, cfg.RestartOnReconnect()),
 	}
 
 	router, err := newRouter(application)
@@ -104,6 +108,7 @@ func main() {
 	}
 
 	log.Printf("web-claude listening on http://%s", addr)
+	log.Printf("claude working directory: %s", workingDir)
 	if err := router.Run(addr); err != nil {
 		log.Fatal(err)
 	}
