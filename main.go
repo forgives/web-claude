@@ -31,6 +31,8 @@ const (
 	commandName = "claude"
 )
 
+var commandArgs = []string{"-c"}
+
 //go:embed static/*
 var assets embed.FS
 
@@ -99,7 +101,7 @@ func main() {
 	application := &app{
 		authSessions: authSessions,
 		passwordHash: cfg.PasswordHash(),
-		terminals:    terminal.NewManager(workingDir, commandName, cfg.RestartOnReconnect()),
+		terminals:    terminal.NewManager(workingDir, commandName, commandArgs, cfg.RestartOnReconnect()),
 	}
 
 	router, err := newRouter(application)

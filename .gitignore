@@ -21,9 +21,8 @@ web-claude
 *.out
 go.work
 
-# Local config (optional, user can uncomment if needed)
-# data/config.json
+# Local config
+data/config.json
 
 # oh-my-claudecode
 .omc/
-

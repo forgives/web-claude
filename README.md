@@ -15,6 +15,7 @@
 - 默认纯黑终端界面，无侧边栏、无额外表单
 - 浏览器断开后保留 `claude` 进程，重连继续附加
 - 支持通过配置文件指定 `claude` 进程启动时的工作目录
+- 新启动的 `claude` 进程默认带 `-c`，尽量续接当前目录最近一次会话
 - 前端输入经 WebSocket 转发到 PTY，PTY 输出实时回传到浏览器
 - WebSocket 输入会过滤危险控制序列，限制异常 payload
 
@@ -31,6 +32,14 @@ go run .
 服务启动前需要保证本机 `PATH` 中可以找到 `claude` 命令。
 
 如果你希望打开页面后直接在某个项目目录中运行 `claude`，可以在 `data/config.json` 中设置 `working_dir`，服务会按这个目录启动 `claude` 进程，而不是按当前启动命令所在目录启动。
+
+仓库默认提交的是 [data/config.example.json](/Users/kanlianhui/workspace/git/web-claude/data/config.example.json) 模板，真实的 [data/config.json](/Users/kanlianhui/workspace/git/web-claude/data/config.json) 已加入 `.gitignore`，便于你本地测试时修改配置而不误提交密码哈希、session secret 或本机监听地址。
+
+首次克隆后可以先执行：
+
+```bash
+cp data/config.example.json data/config.json
+```
 
 首次使用前先设置登录密码：
 
@@ -118,10 +127,10 @@ go run . -set-password
     - 适合持续对话和长任务执行。
   - `true`
     - 每次重连都会终止旧会话并重新启动一个新的 `claude` 进程。
-    - 适合你希望每次打开页面都拿到干净终端的场景。
+    - 新进程默认仍会带 `-c`，因此通常会尽量续接当前目录最近一次 Claude 会话，而不是强制开全新上下文。
 - 影响：
   - 当值为 `false` 时，浏览器刷新后通常还能看到已有会话内容。
-  - 当值为 `true` 时，重连后上下文会丢失，因为终端进程会重新创建。
+  - 当值为 `true` 时，重连后会新起一个终端进程；但由于默认附带 `-c`，Claude 通常会继续当前目录最近一次已持久化的会话。
 
 #### `working_dir`
 

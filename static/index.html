@@ -10,6 +10,42 @@
 <body>
   <main id="app">
     <div id="terminal" aria-label="Claude Code terminal"></div>
+    <div class="scroll-dock" aria-label="终端滚动控制">
+      <button class="scroll-dock__button" type="button" data-scroll-action="top" aria-label="上翻到顶" title="上翻到顶">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6h12"></path>
+          <path d="M8 14l4-4 4 4"></path>
+        </svg>
+      </button>
+      <button class="scroll-dock__button" type="button" data-scroll-action="page-up" aria-label="上翻一页" title="上翻一页">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 16l5-5 5 5"></path>
+          <path d="M7 11l5-5 5 5"></path>
+        </svg>
+      </button>
+      <button class="scroll-dock__button" type="button" data-scroll-action="line-up" aria-label="上翻一行" title="上翻一行">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 15l5-5 5 5"></path>
+        </svg>
+      </button>
+      <button class="scroll-dock__button" type="button" data-scroll-action="line-down" aria-label="下翻一行" title="下翻一行">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 9l5 5 5-5"></path>
+        </svg>
+      </button>
+      <button class="scroll-dock__button" type="button" data-scroll-action="page-down" aria-label="下翻一页" title="下翻一页">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 8l5 5 5-5"></path>
+          <path d="M7 13l5 5 5-5"></path>
+        </svg>
+      </button>
+      <button class="scroll-dock__button" type="button" data-scroll-action="bottom" aria-label="下翻到底" title="下翻到底">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 10l4 4 4-4"></path>
+          <path d="M6 18h12"></path>
+        </svg>
+      </button>
+    </div>
   </main>
   <script src="/static/vendor/xterm/xterm.js"></script>
   <script src="/static/vendor/xterm-addon-fit/xterm-addon-fit.js"></script>

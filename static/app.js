@@ -94,6 +94,24 @@
   fitAddon.fit();
   terminal.focus();
 
+  const scrollActions = {
+    top: () => terminal.scrollToTop(),
+    "page-up": () => terminal.scrollPages(-1),
+    "line-up": () => terminal.scrollLines(-1),
+    "line-down": () => terminal.scrollLines(1),
+    "page-down": () => terminal.scrollPages(1),
+    bottom: () => terminal.scrollToBottom(),
+  };
+
+  document.querySelectorAll("[data-scroll-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const action = scrollActions[button.dataset.scrollAction];
+      if (action) {
+        action();
+      }
+    });
+  });
+
   let socket = null;
   let reconnectTimer = null;
   let reconnectAttempts = 0;

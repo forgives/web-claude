@@ -3,8 +3,26 @@ package terminal
 import (
 	"os"
 	"os/exec"
+	"reflect"
 	"testing"
 )
+
+func TestNewManagerCopiesCommandArgsIntoSession(t *testing.T) {
+	manager := NewManager("/tmp/workspace", "claude", []string{"-c"}, false)
+
+	session := manager.get("default")
+	if session.command != "claude" {
+		t.Fatalf("unexpected command: %q", session.command)
+	}
+	if !reflect.DeepEqual(session.commandArgs, []string{"-c"}) {
+		t.Fatalf("unexpected command args: %#v", session.commandArgs)
+	}
+
+	manager.commandArgs[0] = "--resume"
+	if !reflect.DeepEqual(session.commandArgs, []string{"-c"}) {
+		t.Fatalf("session command args should be isolated from manager mutation: %#v", session.commandArgs)
+	}
+}
 
 func TestFinishProcessDoesNotClearNewSessionState(t *testing.T) {
 	oldPTY, err := os.CreateTemp(t.TempDir(), "old-pty")
